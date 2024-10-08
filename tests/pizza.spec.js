@@ -98,3 +98,11 @@ test('purchase with login', async ({ page }) => {
   // Check balance
   await expect(page.getByText('0.008')).toBeVisible();
 });
+
+test('informational pages', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'About' }).click();
+  await expect(page.locator('h2').first()).toContainText('The secret sauce')
+  await page.getByRole('link', { name: 'History' }).click();
+  await expect(page.locator('h2')).toContainText('Mama Rucci, my my')
+})
