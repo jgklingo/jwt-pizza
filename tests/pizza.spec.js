@@ -121,6 +121,7 @@ test('admin portal', async ({ page }) => {
     await route.fulfill({ json: franchiseRes });
   });
 
+  // login and navigate to admin page
   await page.goto('/');
   await page.getByRole('link', { name: 'Login' }).click();
   await page.getByPlaceholder('Email address').click();
@@ -132,4 +133,13 @@ test('admin portal', async ({ page }) => {
   await page.getByRole('link', { name: 'Admin' }).click();
   await expect(page.getByRole('button', { name: 'Close'}).first()).toBeVisible();
 
+  // admin actions
+  await page.getByRole('button', { name: 'Close'}).nth(1).click();
+  await expect(page.getByText('Sorry to see you go')).toBeVisible();
+  await page.getByRole('button', { name: 'Close'}).click();
+  await page.getByRole('button', { name: 'Close'}).click();
+  await expect(page.getByText('Sorry to see you go')).toBeVisible();
+  await page.getByRole('button', { name: 'Cancel'}).click();
+  await page.getByRole('button', { name: 'Add Franchise'}).click();
+  await expect(page.getByPlaceholder('franchise name')).toBeVisible();
 })
