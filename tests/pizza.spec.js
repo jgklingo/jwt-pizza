@@ -178,6 +178,10 @@ test('franchise portal', async ({ page}) => {
   await page.getByRole('button', { name: 'Cancel'}).click();
   await page.getByRole('button', { name: 'Create store'}).click();
   await expect(page.getByPlaceholder('store name')).toBeVisible();
+
+  // franchisee diner portal
+  await page.getByRole('link', { name: 'FU' }).first().click();
+  await expect(page.getByText('Franchisee User')).toBeVisible();
 });
 
 test('diner dashboard', async ({ page }) => {
