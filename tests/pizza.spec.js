@@ -106,3 +106,30 @@ test('informational pages', async ({ page }) => {
   await page.getByRole('link', { name: 'History' }).click();
   await expect(page.locator('h2')).toContainText('Mama Rucci, my my')
 })
+
+test('admin portal', async ({ page }) => {
+  await page.route('*/**/api/auth', async (route) => {
+    const loginReq = { email: 'a@jwt.com', password: 'a' };
+    const loginRes = { user: { id: 4, name: 'Admin User', email: 'a@jwt.com', roles: [{ role: 'admin' }] }, token: 'abcdef' };
+    expect(route.request().method()).toBe('PUT');
+    expect(route.request().postDataJSON()).toMatchObject(loginReq);
+    await route.fulfill({ json: loginRes });
+  });
+  await page.route('*/**/api/franchise', async (route) => {
+    const franchiseRes = [{ id: 1, name: 'testFranchise', admins: [{ id: 4, name: 'Admin User', email: 'a@jwt.com' }], stores: [{ id: 1, name: 'testStore', totalRevenue: 0 }] }];
+    expect(route.request().method()).toBe('GET');
+    await route.fulfill({ json: franchiseRes });
+  });
+
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByPlaceholder('Email address').click();
+  await page.getByPlaceholder('Email address').fill('a@jwt.com');
+  await page.getByPlaceholder('Password').click();
+  await page.getByPlaceholder('Password').fill('a');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await expect(page.locator('header')).toContainText('Admin');
+  await page.getByRole('link', { name: 'Admin' }).click();
+  await expect(page.getByRole('button', { name: 'Close'}).first()).toBeVisible();
+
+})
