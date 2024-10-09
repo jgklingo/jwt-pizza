@@ -105,7 +105,7 @@ test('informational pages', async ({ page }) => {
   await expect(page.locator('h2').first()).toContainText('The secret sauce')
   await page.getByRole('link', { name: 'History' }).click();
   await expect(page.locator('h2')).toContainText('Mama Rucci, my my')
-})
+});
 
 test('admin portal', async ({ page }) => {
   await page.route('*/**/api/auth', async (route) => {
@@ -142,7 +142,7 @@ test('admin portal', async ({ page }) => {
   await page.getByRole('button', { name: 'Cancel'}).click();
   await page.getByRole('button', { name: 'Add Franchise'}).click();
   await expect(page.getByPlaceholder('franchise name')).toBeVisible();
-})
+});
 
 test('franchise portal', async ({ page}) => {
   await page.route('*/**/api/auth', async (route) => {
@@ -178,4 +178,33 @@ test('franchise portal', async ({ page}) => {
   await page.getByRole('button', { name: 'Cancel'}).click();
   await page.getByRole('button', { name: 'Create store'}).click();
   await expect(page.getByPlaceholder('store name')).toBeVisible();
-})
+});
+
+test('diner dashboard', async ({ page }) => {
+  await page.route('*/**/api/auth', async (route) => {
+    const loginReq = { email: 'a@jwt.com', password: 'a' };
+    const loginRes = { user: { id: 4, name: 'Admin User', email: 'a@jwt.com', roles: [{ role: 'admin' }] }, token: 'abcdef' };
+    expect(route.request().method()).toBe('PUT');
+    expect(route.request().postDataJSON()).toMatchObject(loginReq);
+    await route.fulfill({ json: loginRes });
+  });
+  await page.route('*/**/api/order', async (route) => {
+    const orderRes = { dinerId: 4, orders: [{ id: 1, franchiseId: 1, storeId: 1, date: "2024-06-05T05:14:40.000Z", items: [{ id: 1, menuId: 1, description: 'Veggie', price: 0.05 }] }], page: 1 };
+    expect(route.request().method()).toBe('GET');
+    await route.fulfill({ json: orderRes });
+  });
+
+  // login
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByPlaceholder('Email address').click();
+  await page.getByPlaceholder('Email address').fill('a@jwt.com');
+  await page.getByPlaceholder('Password').click();
+  await page.getByPlaceholder('Password').fill('a');
+  await page.getByRole('button', { name: 'Login' }).click();
+
+  // navigate to diner dashboard
+  await page.getByText('AU').first().click();
+  await expect(page.getByText('Your pizza kitchen')).toBeVisible();
+  await expect(page.getByText('2024-06-05T05:14:40.000Z')).toBeVisible();
+});
