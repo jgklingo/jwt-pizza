@@ -208,3 +208,30 @@ test('diner dashboard', async ({ page }) => {
   await expect(page.getByText('Your pizza kitchen')).toBeVisible();
   await expect(page.getByText('2024-06-05T05:14:40.000Z')).toBeVisible();
 });
+
+test('docs', async ({ page }) => {
+  await page.goto('/docs');
+  await expect(page.locator('h2')).toContainText('JWT Pizza API');
+});
+
+test('register', async ({ page }) => {
+  await page.route('*/**/api/auth', async (route) => {
+    const registerReq = { name: 'Test', email: 'test@test.test', password: 'test' };
+    const registerRes = { user: { id: 5, name: 'Test', email: 'test@test.test', roles: [{ role: 'diner' }] }, token: 'abcdef' };
+    expect(route.request().method()).toBe('POST');
+    expect(route.request().postDataJSON()).toMatchObject(registerReq);
+    await route.fulfill({ json: registerRes });
+  });
+
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Register' }).click();
+  await expect(page.getByRole('heading')).toContainText('Welcome to the party');
+  await page.getByPlaceholder('Full name').click();
+  await page.getByPlaceholder('Full name').fill('Test');
+  await page.getByPlaceholder('Email address').click();
+  await page.getByPlaceholder('Email address').fill('test@test.test');
+  await page.getByPlaceholder('Password').click();
+  await page.getByPlaceholder('Password').fill('test');
+  await page.getByRole('button', { name: 'Register' }).click();
+  await expect(page.getByLabel('Global')).toContainText('T');
+});
