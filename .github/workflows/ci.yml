@@ -104,8 +104,8 @@ jobs:
         env:
           version: ${{needs.build.outputs.version}}
         with:
-          tag: stage-version-${{ env.version }}
-          name: Staging release ${{ env.version }}
+          tag: version-${{ env.version }}
+          name: Version ${{ env.version }}
           body: |
             ## 🚀 Changes
 
