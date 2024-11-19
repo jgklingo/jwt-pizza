@@ -156,7 +156,7 @@ export function scenario_1() {
     // Verify pizza
     response = http.post(
       'https://pizza-factory.cs329.click/api/order/verify',
-      `{"jwt":${vars['jwt1']}}`,
+      `{"jwt":"${vars['jwt1']}"}`,
       {
         headers: {
           accept: '*/*',
